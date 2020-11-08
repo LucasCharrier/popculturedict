@@ -15,7 +15,7 @@ class AddColumnExempleToTableDefinitions extends Migration
     {
         Schema::table('definitions', function (Blueprint $table) {
             //
-            $table->string('exemple')->default('');
+            $table->text('exemple')->default('');
 
         });
     }

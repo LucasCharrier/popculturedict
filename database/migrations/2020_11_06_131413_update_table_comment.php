@@ -15,7 +15,7 @@ class UpdateTableComment extends Migration
     {
         //
         Schema::table('comments', function (Blueprint $table) {
-            $table->string('text')->nullable(false);
+            $table->text('text')->nullable(false);
             $table->foreignId('user_id')->constrained();
             $table->foreignId('word_id')->constrained();
         });
