@@ -104,39 +104,5 @@ class DefinitionController extends Controller
 
         }
         return (new DefinitionResource($definition))->response()->setStatusCode(201);
-        // //
-        // $request->validate([
-        //     'name' => 'required|max:255',
-        // ]);
-
-        // $word = Word::create($request->all());
-        
-
-        // return (new WordResource($word))
-        //         ->response()
-        //         ->setStatusCode(201);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

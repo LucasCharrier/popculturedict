@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Definition;
+use App\Models\Tag;
+use App\Models\Word;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
@@ -67,23 +69,71 @@ class DefinitionTest extends TestCase
     /**
      *  @test
      */
-    public function authenticated_users_can_create_a_definition()
+    public function authenticated_users_can_create_a_definition_with_not_tags()
     {
         $this->actingAsLoggedUser();
         $count = Definition::all()->count();
-        $response = $this->post('api/definitions', [
-            'text' => 'next text definition',
-            'name' => 'New word',
-            'exemple' => 'New exemple for definition',
-        ]);
+        $countWord = Word::all()->count();
+
+        $response = $this->post('api/definitions', $this->data());
         $response->assertStatus(201);
         $this->assertCount($count + 1, Definition::all());
+        $this->assertCount($countWord + 1, Word::all());
+    }
+
+    /**
+     *  @test
+     */
+    public function authenticated_users_can_create_a_definition_with_not_tags_and_a_word_that_already_exists()
+    {
+        $this->actingAsLoggedUser();
+        $count = Definition::all()->count();
+        Word::factory()->create(['name' => $this->data()['name']]);
+        $countWord = Word::all()->count();
+
+        $response = $this->post('api/definitions', $this->data());
+        $response->assertStatus(201);
+        $this->assertCount($count + 1, Definition::all());
+        $this->assertCount($countWord, Word::all());
+    }
+
+
+    /**
+     *  @test
+     */
+    public function authenticated_users_can_create_a_definition_with_new_tags()
+    {
+        $this->actingAsLoggedUser();
+        $count = Definition::all()->count();
+        $count = Tag::all()->count();
+        $response = $this->post('api/definitions', array_merge($this->data(), [
+            'tags' => ['toto', 'tata']
+        ]));
+        $response->assertStatus(201);
+        $this->assertCount($count + 2, Tag::all());
+    }
+
+    /**
+     *  @test
+     */
+    public function authenticated_users_can_create_a_definition_with_old_tags_that_are_not_created()
+    {
+        // should create only one tag, the one that didn't exist before
+        $this->withoutExceptionHandling();
+        $this->actingAsLoggedUser();
+        Tag::factory()->create(['text' => 'toto']);
+        $count = Tag::all()->count();
+        $response = $this->post('api/definitions', array_merge($this->data(), [
+            'tags' => ['toto', 'tata']
+        ]));
+        $response->assertStatus(201);
+        $this->assertCount($count + 1, Tag::all());
     }
 
     private function data()
     {
         return [
-            'test' => 'next text definition',
+            'text' => 'next text definition',
             'name' => 'New word',
             'exemple' => 'New exemple for definition',
         ];
