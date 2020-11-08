@@ -130,6 +130,32 @@ class DefinitionTest extends TestCase
         $this->assertCount($count + 1, Tag::all());
     }
 
+    /**
+     *  @test
+     */
+    public function authenticated_users_can_delete_their_own_definition()
+    {
+        // should create only one tag, the one that didn't exist before
+        $this->withoutExceptionHandling();
+        $this->actingAsLoggedUser();
+        Tag::factory()->create(['text' => 'toto']);
+        $count = Tag::all()->count();
+        $response = $this->post('api/definitions', array_merge($this->data(), [
+            'tags' => ['toto', 'tata']
+        ]));
+        $response->assertStatus(201);
+        $this->assertCount($count + 1, Tag::all());
+        $data = $response->decodeResponseJson();
+        $count = Definition::all()->count();
+
+        $response = $this->post('api/definitions/'.$data['data']['id']);
+        $response->assertStatus(204);
+        $this->assertCount($count - 1, Definition::all());
+
+        // $response->assertStatus(201);
+        // $this->assertCount($count + 1, Tag::all());
+    }
+
     private function data()
     {
         return [

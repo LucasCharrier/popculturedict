@@ -105,4 +105,21 @@ class DefinitionController extends Controller
         }
         return (new DefinitionResource($definition))->response()->setStatusCode(201);
     }
+
+    public function delete($id, Request $request)
+    {
+        $definition = Definition::findOrFail($id)->first();
+        $user = $request->user();
+        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $out->writeln('toot'.$definition->user()->first()['id']);
+
+        if ($user->id != $definition->user()->first()['id']) {
+            return response()->json(null, 401);
+        }
+        
+        $definition->delete();
+
+        return response()->json(null, 204);
+    }
+
 }
