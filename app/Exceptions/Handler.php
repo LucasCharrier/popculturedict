@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Exceptions;
-
+use Illuminate\Auth\AuthenticationException;
+use Response;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -33,5 +34,12 @@ class Handler extends ExceptionHandler
     public function register()
     {
         //
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        // In Laravel 5.7 or above route checking happens before exception throwing, so unauthenticate override exception does not apply
+        // and if application/json is not used it will send to route::login with a 500 errors because it does not exist
+        return response()->json(['error' => 'Unauthenticated.'], 401);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 use App\Models\Word;
 use App\Http\Resources\Word as WordResource;
 use App\Http\Resources\WordCollection;
@@ -49,13 +51,12 @@ class DefinitionController extends Controller
      */
     public function store(Request $request)
     {
-        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
-        // $word = new Word();
-        // $word->name = $request->get('name');
-        // $word->definition = $request->get('definition');
-        // // $word->slug = Str::slug($word->title);
-        // $word->user_id = $request->user()->id;
+        $this->validate(request(), [
+            'name' => 'required',
+            'text' => 'required',
+            'exemple' => 'required'
+        ]);
         $word = Word::where('name', $request->get('name'))->first();
         // $output->writeln('content of word' . $word);
         if (!$word) {
