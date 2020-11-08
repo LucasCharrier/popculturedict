@@ -16,7 +16,7 @@ class UpdateTableDefinition extends Migration
     {
         //
         Schema::table('definitions', function (Blueprint $table) {
-            $table->string('text')->nullable(false);
+            $table->mediumText('text')->nullable(false);
             $table->foreignId('user_id')->constrained();
         });
     }
