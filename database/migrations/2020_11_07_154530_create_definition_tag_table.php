@@ -20,10 +20,12 @@ class CreateDefinitionTagTable extends Migration
             $table->primary(['tag_id','definition_id']);
             $table->foreign('tag_id')
                 ->references('id')
-                ->on('tags');
+                ->on('tags')
+                ->onDelete('cascade');
              $table->foreign('definition_id')
                 ->references('id')
-                ->on('definitions');
+                ->on('definitions')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
