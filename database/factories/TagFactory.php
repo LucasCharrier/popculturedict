@@ -27,4 +27,20 @@ class TagFactory extends Factory
             'text' => $this->faker->name
         ];
     }
+//     // ONE TO ONE relationship (with Users already created)
+// $factory->define(App\Profile::class, function (Faker\Generator $faker) {
+//     return [
+//         'user_id' => $faker->unique()->numberBetween(1, App\User::count()),
+//         // Rest of attributes...
+//     ];
+// });
+
+// // ONE TO MANY relationship (with Users already created)
+// $factory->define(App\Posts::class, function (Faker\Generator $faker) {
+//     $users = App\User::pluck('id')->toArray();
+//     return [
+//         'user_id' => $faker->randomElement($users),
+//         // Rest of attributes...
+//     ];
+// });
 }
