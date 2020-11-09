@@ -24,7 +24,7 @@ class TagController extends Controller
 
     public function userDefinitions($id)
     {
-        return new DefinitionCollection(Tag::findOrFail($id)->definitions());
+        return new DefinitionCollection(Tag::findOrFail($id)->definitions()->paginate());
     }
 
     // /**
