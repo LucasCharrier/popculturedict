@@ -24,8 +24,8 @@ class DefinitionController extends Controller
             $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
                 ->where(function ($query) use ($search){
-                    $query->where('text', 'COLLATE UTF8_GENERAL_CI LIKE', '%'.$search.'%')
-                    ->orWhere('name', 'COLLATE UTF8_GENERAL_CI LIKE', '%'.$search.'%');
+                    $query->where('text', 'LIKE', '%'.$search.'%')
+                    ->orWhere('name', 'LIKE', '%'.$search.'%');
                     // ->where('words.name', 'like', '%'.$search.'%');
                     // ->orWhere('words.name', 'like', '%'.$search.'%');
             })
