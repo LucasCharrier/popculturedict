@@ -17,9 +17,19 @@ class DefinitionTest extends TestCase
     /**
      *  @test
      */
-    public function every_in_users_can_see_the_definition_list()
+    public function every_in_users_can_fetch_definition_list()
     {
         $response = $this->get('api/definitions');
+
+        $response->assertStatus(200);
+    }
+
+        /**
+     *  @test
+     */
+    public function every_in_users_can_fetch_definition_list_with_query()
+    {
+        $response = $this->get('api/definitions?q=test');
 
         $response->assertStatus(200);
     }

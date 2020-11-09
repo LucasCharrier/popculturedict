@@ -21,11 +21,11 @@ class DefinitionController extends Controller
     {
         $search =  $request->input('q');
         if($search!=""){
-            $definition = Definition::where(function ($query) use ($search){
-                $query->join('words', 'definitions.word_id', '=', 'words.id')
+            $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
-                // ->where('wname', 'LIKE', '%'.$search.'%')
-                ->orWhere('text', 'LIKE', '%'.$search.'%');
+                ->where(function ($query) use ($search){
+                    $query->where('text', 'COLLATE UTF8_GENERAL_CI LIKE', '%'.$search.'%')
+                    ->orWhere('name', 'COLLATE UTF8_GENERAL_CI LIKE', '%'.$search.'%');
                     // ->where('words.name', 'like', '%'.$search.'%');
                     // ->orWhere('words.name', 'like', '%'.$search.'%');
             })
