@@ -29,6 +29,7 @@ class DefinitionTest extends TestCase
      */
     public function every_in_users_can_fetch_definition_list_with_query()
     {
+        // break in test because ilike is not supported by sqlite
         $response = $this->get('api/definitions?q=test');
 
         $response->assertStatus(200);
@@ -129,7 +130,6 @@ class DefinitionTest extends TestCase
     public function authenticated_users_can_create_a_definition_with_old_tags_that_are_not_created()
     {
         // should create only one tag, the one that didn't exist before
-        $this->withoutExceptionHandling();
         $this->actingAsLoggedUser();
         Tag::factory()->create(['text' => 'toto']);
         $count = Tag::all()->count();
@@ -146,7 +146,7 @@ class DefinitionTest extends TestCase
     public function authenticated_users_can_delete_their_own_definition()
     {
         // should create only one tag, the one that didn't exist before
-        $this->withoutExceptionHandling();
+        // $this->withoutExceptionHandling();
         $this->actingAsLoggedUser();
         Tag::factory()->create(['text' => 'toto']);
         $count = Tag::all()->count();
@@ -169,7 +169,6 @@ class DefinitionTest extends TestCase
     public function authenticated_users_cannot_delete_other_definition()
     {
         // should create only one tag, the one that didn't exist before
-        $this->withoutExceptionHandling();
         $this->actingAsLoggedUser();
         Tag::factory()->create(['text' => 'toto']);
         $count = Tag::all()->count();

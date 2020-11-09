@@ -45,10 +45,6 @@ Route::get('/users', 'App\Http\Controllers\UserController@index');
 Route::get('/users/{id}/definitions', 'App\Http\Controllers\UserController@userDefinitions');
 Route::get('/tags/{id}/definitions', 'App\Http\Controllers\TagController@userDefinitions');
 
-
-// Route::get('/tags', 'App\Http\Controllers\UserController@index');
-// Route::get('/tags/{id}', 'App\Http\Controllers\UserController@show');
-
 Route::get('/comments', 'App\Http\Controllers\UserController@index');
 Route::get('/comments/{id}', 'App\Http\Controllers\UserController@show');
 
