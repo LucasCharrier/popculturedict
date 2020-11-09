@@ -24,8 +24,8 @@ class DefinitionController extends Controller
             $definition = Definition::where(function ($query) use ($search){
                 $query->join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
-                ->where('wname', 'LIKE', '%'.$search.'%')
-                ->orWhere('text', 'like', '%'.$search.'%');
+                // ->where('wname', 'LIKE', '%'.$search.'%')
+                ->orWhere('text', 'LIKE', '%'.$search.'%');
                     // ->where('words.name', 'like', '%'.$search.'%');
                     // ->orWhere('words.name', 'like', '%'.$search.'%');
             })
@@ -110,8 +110,8 @@ class DefinitionController extends Controller
     {
         $definition = Definition::findOrFail($id)->first();
         $user = $request->user();
-        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $out->writeln('toot'.$definition->user()->first()['id']);
+        // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $out->writeln('toot'.$definition->user()->first()['id']);
 
         if ($user->id != $definition->user()->first()['id']) {
             return response()->json(null, 401);
