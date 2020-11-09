@@ -31,6 +31,13 @@ class Definition extends Model
         return $this->belongsToMany('App\Models\Comment');
     }
 
+    public function reactions()
+    {
+        return $this->belongsToMany('App\Models\User')->using('App\Models\DefinitionUser')->withPivot([
+            'reaction_type'
+        ]);;
+    }
+
     public function user()
     {
         return $this->belongsTo('App\Models\User');

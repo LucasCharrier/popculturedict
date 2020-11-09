@@ -54,6 +54,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany('App\Models\Comment');
     }
 
+    public function reactions()
+    {
+        return $this->belongsToMany('App\Models\Definition');
+    }
+
     // Rest omitted for brevity
 
     public function setPasswordAttribute($password)
