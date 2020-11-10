@@ -108,7 +108,7 @@ class DefinitionController extends Controller
 
     public function delete($id, Request $request)
     {
-        $definition = Definition::findOrFail($id)->first();
+        $definition = Definition::findOrFail($id);
         $user = $request->user();
         // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
         // $out->writeln('toot'.$definition->user()->first()['id']);
