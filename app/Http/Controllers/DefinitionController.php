@@ -22,7 +22,7 @@ class DefinitionController extends Controller
         $search =  $request->input('q');
         if($search!=""){
             $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
-                ->select('words.name as wname', 'definitions.*', 'definition_tag.*')
+                ->select('words.name as wname', 'definitions.*')
                 ->where(function ($query) use ($search){
                     $query->where('text', 'ILIKE', '%'.$search.'%')
                     ->orWhere('name', 'ILIKE', '%'.$search.'%');
