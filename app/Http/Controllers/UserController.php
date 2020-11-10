@@ -34,7 +34,7 @@ class UserController extends Controller
         $definition = Definition::findOrFail($id);
         $value = $definition->reactions->where('pivot.user_id', $request->user()->id)->pluck('pivot.reaction_type')->unique()->first();
         if ($value == config('enums.reaction_type')['LIKE']) {
-            return response()->json(null, 404);
+            return response()->json(null, 200);
         } else if ($value == config('enums.reaction_type')['DISLIKE']) {
             $definition->like = $definition->dislike - 1;
         }
@@ -48,7 +48,7 @@ class UserController extends Controller
         $definition = Definition::findOrFail($id);
         $value = $definition->reactions->where('pivot.user_id',  $request->user()->id)->pluck('pivot.reaction_type')->unique()->first();
         if ($value == config('enums.reaction_type')['DISLIKE']) {
-            return response()->json(null, 404);
+            return response()->json(null, 200);
         } else if ($value == config('enums.reaction_type')['LIKE']) {
             $definition->like = $definition->like - 1;
         }
