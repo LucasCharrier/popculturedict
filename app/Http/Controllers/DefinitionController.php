@@ -116,7 +116,7 @@ class DefinitionController extends Controller
         if ($user->id != $definition->user()->first()['id']) {
             return response()->json(null, 401);
         }
-        
+        $definition->tags()->detach();
         $definition->delete();
 
         return response()->json(null, 204);
