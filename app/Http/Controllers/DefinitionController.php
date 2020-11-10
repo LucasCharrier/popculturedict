@@ -63,8 +63,6 @@ class DefinitionController extends Controller
         }
         
         $media_url = $request->get('media_url');
-        // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-        // $out->writeln('content of word' . parse_url($request->media_url)['host']);
 
         if ($media_url && endsWith('giphy.com', parse_url($request->media_url)['host'])) {
             return response()->json(null, 401);
@@ -89,15 +87,17 @@ class DefinitionController extends Controller
         // $func = function($value) {
         //     return ['text', 'LIKE', '%'.strtolower($value).'%'];
         // };
-        $tags = $request->get('tags');
+        $tags = array_unique($request->get('tags'));
         if ($tags) {
             $tagsObj = Tag::query();
             foreach($tags as $tag){
-                $tagsObj->orWhere('text', 'LIKE', '%'.trim(strtolower($tag)).'%');
+                $tagsObj->orWhere('text', '=', trim(strtolower($tag)));
             }
-            $tagsObj = $tagsObj->distinct()->get()->toArray();
+            $tagsObj1 = $tagsObj->distinct()->get();
+
+            $tagsObj = $tagsObj1->toArray();
+
             //$output->writeln('content of word' . implode("|",$tagsObj));
-            
             $tagIds = array_map(function ($a) { return $a['id']; }, $tagsObj);
             $tagNames = array_map(function ($a) { return strtolower($a['text']); }, $tagsObj);
             $tagsToCreate = array_filter($tags, function ($a) use ($tagNames) { 
@@ -112,6 +112,7 @@ class DefinitionController extends Controller
                 }
                 return true;
             });
+
             $definition->tags()->sync($tagIds, false);
             $definition->tags()->createMany(array_map(function ($a) { return ['text' => $a]; }, $tagsToCreate));
 
