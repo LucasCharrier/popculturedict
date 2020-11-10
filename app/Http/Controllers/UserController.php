@@ -36,7 +36,7 @@ class UserController extends Controller
         if ($value == config('enums.reaction_type')['LIKE']) {
             return response()->json(null, 200);
         } else if ($value == config('enums.reaction_type')['DISLIKE']) {
-            $definition->like = $definition->dislike - 1;
+            $definition->dislike = $definition->dislike - 1;
         }
         $definition->like = $definition->like + 1;
         $definition->save();
