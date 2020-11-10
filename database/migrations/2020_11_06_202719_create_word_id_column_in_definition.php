@@ -14,8 +14,7 @@ class CreateWordIdColumnInDefinition extends Migration
     public function up()
     {
         Schema::table('definitions', function (Blueprint $table) {
-            $table->foreignId('word_id')->constrained();
-
+            $table->foreignId('word_id');
         });
     }
 
