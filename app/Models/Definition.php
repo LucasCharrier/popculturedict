@@ -18,8 +18,10 @@ class Definition extends Model
         'word_id',
         'text',
         'user_id',
-        'exemple'
+        'exemple',
+        'media_url'
     ];
+
 
     public function word()
     {

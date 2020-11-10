@@ -57,6 +57,18 @@ class DefinitionController extends Controller
             'text' => 'required',
             'exemple' => 'required'
         ]);
+
+        function endsWith($haystack, $needle) {
+            return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+        }
+        
+        $media_url = $request->get('media_url');
+        // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $out->writeln('content of word' . parse_url($request->media_url)['host']);
+
+        if ($media_url && endsWith('giphy.com', parse_url($request->media_url)['host'])) {
+            return response()->json(null, 401);
+        }
         $word = Word::where('name', $request->get('name'))->first();
         // $output->writeln('content of word' . $word);
         if (!$word) {
@@ -72,6 +84,7 @@ class DefinitionController extends Controller
             'exemple' => $request->get('exemple'),
             'word_id' => $word->id,
             'user_id' => $request->user()->id,
+            'media_url' => $media_url
         ]);
         // $func = function($value) {
         //     return ['text', 'LIKE', '%'.strtolower($value).'%'];

@@ -29,6 +29,7 @@ class Definition extends JsonResource
             'tags' => new TagCollection($this->tags),
             'like' => (int) $this->like,
             'dislike' => (int) $this->dislike,
+            'media_url' => $this->media_url,
             // 'user_reaction' => $this->reactions->pivot() wherePivot('user_id', Auth::id())->pluck('pivot.reaction_type')->unique()->first(),
             'user_reaction' => $this->reactions->where('pivot.user_id', Auth::id())->pluck('pivot.reaction_type')->unique()->first(),
             
