@@ -23,6 +23,7 @@ class DefinitionController extends Controller
         if($search!=""){
             $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
+                ->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC'])
                 ->where(function ($query) use ($search){
                     $query->where('text', 'ILIKE', '%'.$search.'%')
                     ->orWhere('name', 'ILIKE', '%'.$search.'%');
@@ -35,7 +36,8 @@ class DefinitionController extends Controller
             return new DefinitionCollection($definition);
         }
         else{
-            return new DefinitionCollection(Definition::orderBy('created_at', 'desc')->paginate());
+            return new DefinitionCollection(Definition::orderBy('created_at', 'desc')->where('visibility', config('enums.visibility')['PUBLIC'])
+                ->paginate());
         }
     }
 
@@ -82,7 +84,8 @@ class DefinitionController extends Controller
             'exemple' => $request->get('exemple'),
             'word_id' => $word->id,
             'user_id' => $request->user()->id,
-            'media_url' => $media_url
+            'media_url' => $media_url,
+            'visibility' => config('enums.visibility')[$request->get('visibility', 'PUBLIC')]
         ]);
         // $func = function($value) {
         //     return ['text', 'LIKE', '%'.strtolower($value).'%'];
