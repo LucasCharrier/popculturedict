@@ -19,7 +19,8 @@ class Definition extends Model
         'text',
         'user_id',
         'exemple',
-        'media_url'
+        'media_url',
+        'visibility'
     ];
 
 
