@@ -22,9 +22,11 @@ class TagController extends Controller
         return new TagCollection(Tag::all());
     }
 
-    public function userDefinitions($id)
+    public function userDefinitions($id, Request $request)
     {
-        return new DefinitionCollection(Tag::findOrFail($id)->definitions()->paginate());
+        $definition = Tag::findOrFail($id)->definitions()->orderBy('created_at', 'desc');
+        $definition->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC']);
+        return new DefinitionCollection($definition->paginate());
     }
 
     // /**

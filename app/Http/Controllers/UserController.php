@@ -57,8 +57,12 @@ class UserController extends Controller
         $request->user()->reactions()->sync([$id => ['reaction_type' => config('enums.reaction_type')['DISLIKE']]], false);
     }
 
-    public function userDefinitions($id)
+    public function userDefinitions($id, Request $request)
     {
-        return new DefinitionCollection(User::findOrFail($id)->definitions()->orderBy('created_at', 'desc')->paginate());
+        $definition = User::findOrFail($id)->definitions()->orderBy('created_at', 'desc');
+        if (!$request->user() || $request->user()->id != $id) {
+            $definition->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC']);
+        }
+        return new DefinitionCollection($definition->paginate());
     }
 }
