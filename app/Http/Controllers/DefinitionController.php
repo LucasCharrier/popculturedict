@@ -20,19 +20,34 @@ class DefinitionController extends Controller
     public function index(Request $request)
     {
         $search =  $request->input('q');
-        if($search!=""){
+        $character = $request->input('character');
+        if ($search != "") {
             $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
                 ->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC'])
                 ->where(function ($query) use ($search){
-                    $query->where('text', 'ILIKE', '%'.$search.'%')
-                    ->orWhere('name', 'ILIKE', '%'.$search.'%');
-                    // ->where('words.name', 'like', '%'.$search.'%');
-                    // ->orWhere('words.name', 'like', '%'.$search.'%');
+                    // $query->where('text', 'ILIKE', '%'.$search.'%')
+                    // ->orWhere('name', 'ILIKE', '%'.$search.'%');
+                    $query->where('words.name', 'like', '%'.$search.'%')
+                    ->orWhere('words.name', 'like', '%'.$search.'%');
             })
             ->orderBy('created_at', 'desc')
             ->paginate();
             $definition->appends(['q' => $search]);
+            return new DefinitionCollection($definition);
+        } else if ($character != "") {
+            $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
+                ->select('words.name as wname', 'definitions.*')
+                ->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC'])
+                ->where(function ($query) use ($character){
+                    // $query->where('text', 'ILIKE', $character.'%')
+                    // ->orWhere('name', 'ILIKE', $character.'%');
+                    $query->where('words.name', 'like', $character.'%')
+                    ->orWhere('words.name', 'like', $character.'%');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(100);
+            $definition->appends(['q' => $character]);
             return new DefinitionCollection($definition);
         }
         else{
@@ -45,12 +60,7 @@ class DefinitionController extends Controller
     {
         return new DefinitionResource(Definition::findOrFail($id));
     }
-    /*
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
 
