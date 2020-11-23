@@ -26,10 +26,10 @@ class DefinitionController extends Controller
                 ->select('words.name as wname', 'definitions.*')
                 ->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC'])
                 ->where(function ($query) use ($search){
-                    // $query->where('text', 'ILIKE', '%'.$search.'%')
-                    // ->orWhere('name', 'ILIKE', '%'.$search.'%');
-                    $query->where('words.name', 'like', '%'.$search.'%')
-                    ->orWhere('words.name', 'like', '%'.$search.'%');
+                    $query->where('text', 'ILIKE', '%'.$search.'%')
+                    ->orWhere('name', 'ILIKE', '%'.$search.'%');
+                    // $query->where('words.name', 'like', '%'.$search.'%')
+                    // ->orWhere('words.name', 'like', '%'.$search.'%');
             })
             ->orderBy('created_at', 'desc')
             ->paginate();
