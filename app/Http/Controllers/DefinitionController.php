@@ -22,16 +22,16 @@ class DefinitionController extends Controller
         $search =  $request->input('q');
         $character = $request->input('character');
         if ($search != "") {
-            $pieces = explode("-", $search);
-            $pieces = implode(" ", $pieces);
+            // $pieces = explode("-", $search);
+            // $pieces = implode(" ", $pieces);
             $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
                 ->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC'])
                 ->where(function ($query) use ($search){
                     $query->where('text', 'ILIKE', '%'.$search.'%')
-                    ->orWhere('name', 'ILIKE', '%'.$search.'%')
-                    ->orWhere('name', 'ILIKE', '%'.$pieces.'%')
-                    ->orWhere('text', 'ILIKE', '%'.$pieces.'%');
+                    ->orWhere('name', 'ILIKE', '%'.$search.'%');
+                    // ->orWhere('name', 'ILIKE', '%'.$pieces.'%')
+                    // ->orWhere('text', 'ILIKE', '%'.$pieces.'%');
                     // $query->where('words.name', 'like', '%'.$search.'%')
                     // ->orWhere('words.name', 'like', '%'.$search.'%');
             })
