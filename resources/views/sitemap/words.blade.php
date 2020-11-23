@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     @foreach ($words as $word)
         <url>
-            <loc><?php echo env('APP_FRONT_URL') ? env('APP_FRONT_URL') : 'https://lepopdictionnaire.herokuapp.com'; ?>/{{ implode("-", explode(" ", $word->name)) }}</loc>
+            <loc><?php echo env('APP_FRONT_URL') ? env('APP_FRONT_URL') : 'https://lepopdictionnaire.herokuapp.com'; ?>/{{ strtolower(implode("-", explode(" ", $word->name))) }}</loc>
             <lastmod>{{ $word->created_at->tz('UTC')->toAtomString() }}</lastmod>
             <changefreq>weekly</changefreq>
             <priority>0.9</priority>
