@@ -17,7 +17,9 @@ regarding test especially.
 Though I'll try to be on 80% coverage. 
 
 ## TODOS (ordered in the order I'd like to implements them at the time)
+- [x] added redis and image generate dummy process
 - [] review tests setup, mocking requests
+- [] finish image process 
 - [] implements fuzzy search using a token field or other methods in postgresql
 - [] design media link attached to a post 
 - [] add new endpoint : get one random word
