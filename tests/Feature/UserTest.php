@@ -19,6 +19,9 @@ class UserTest extends TestCase
      */
     public function authenticated_users_can_like_a_definition()
     {
+        // Action should send a 200 response, and like should be 
+        // incremented by one
+        
         $this->actingAsLoggedUser();
         $this->withoutExceptionHandling();
         $user = User::factory()->create();
@@ -35,6 +38,9 @@ class UserTest extends TestCase
      */
     public function authenticated_users_can_dislike_a_definition()
     {
+        // Action should send a 200 response, and dislike should be 
+        // incremented by one
+
         $this->actingAsLoggedUser();
         $this->withoutExceptionHandling();
         $user = User::factory()->create();
@@ -43,7 +49,6 @@ class UserTest extends TestCase
         $definition = Definition::factory()->create();
         $response = $this->post('api/definitions/'.$definition['id'].'/dislike');
         $response->assertStatus(200);
-        Definition::find($definition['id']);
         $this->assertEquals(Definition::find($definition['id'])->dislike, 1);
     }
 

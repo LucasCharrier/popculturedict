@@ -19,20 +19,58 @@ class DefinitionTest extends TestCase
      */
     public function every_in_users_can_fetch_definition_list()
     {
+        $user = User::factory()->create();
+        $word = Word::factory()->create();
+        $definition = Definition::factory()->create([
+            'word_id' => $word->id,
+            'user_id' => $user->id
+        ]);
         $response = $this->get('api/definitions');
-
         $response->assertStatus(200);
+        $data = $response->decodeResponseJson();
+        $definitionsInResponse = array_map(function ($d) { return $d['id']; }, $data['data']);
+        $this->assertEquals(count($definitionsInResponse), 1);
+        $this->assertEquals($definitionsInResponse[0], $definition->id);
     }
 
-        /**
+    /**
      *  @test
      */
     public function every_in_users_can_fetch_definition_list_with_query()
     {
-        $this->withoutExceptionHandling();
-        $response = $this->get('api/definitions?q=test');
+        // $this->withoutExceptionHandling();
+        $user = User::factory()->create();
+        $word = Word::factory()->create(['name' => 'something']);
+        $definitionWithQueryWordInText = Definition::factory()->create([
+            'text' => 'test',
+            'word_id' => $word->id,
+            'user_id' => $user->id
+        ]);
+        $definitionWithAnotherWord = Definition::factory()->create([
+            'text' => 'anotherword',
+            'word_id' => $word->id,
+            'user_id' => $user->id
+        ]);
 
+        $response = $this->get('api/definitions?q=test');
         $response->assertStatus(200);
+        $data = $response->decodeResponseJson();
+        $definitionsInResponse = array_map(function ($d) { return $d['id']; }, $data['data']);
+        $this->assertEquals(count($definitionsInResponse), 1);
+        $this->assertEquals($definitionsInResponse[0], $definitionWithQueryWordInText->id);
+
+        $word = Word::factory()->create(['name' => 'wordinwordtable']);
+        $definitionWithQueryWordInWordTable = Definition::factory()->create([
+            'text' => 'test',
+            'word_id' => $word->id,
+            'user_id' => $user->id
+        ]);
+        $response = $this->get('api/definitions?q=wordinwordtable');
+        $response->assertStatus(200);
+        $data = $response->decodeResponseJson();
+        $definitionsInResponse = array_map(function ($d) { return $d['id']; }, $data['data']);
+        $this->assertEquals(count($definitionsInResponse), 1);
+        $this->assertEquals($definitionsInResponse[0], $definitionWithQueryWordInWordTable->id);
     }
 
     /**
@@ -40,8 +78,10 @@ class DefinitionTest extends TestCase
      */
     public function unauthenticated_users_cannot_create_a_definition()
     {
+        // TODO
         // In Laravel 5.7 or above route checking happens before exception throwing, so unauthenticate override exception does not apply
         // and if application/json is not used it will send to route::login with a 500 errors because it does not exist
+        // we should determine a better way to take this in consideration -> to investigate
         $response = $this->withHeaders([
             'Accept' => 'application/json',
         ])->post('api/definitions', $this->data());
