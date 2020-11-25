@@ -29,7 +29,7 @@ class DefinitionTest extends TestCase
      */
     public function every_in_users_can_fetch_definition_list_with_query()
     {
-        // break in test because ilike is not supported by sqlite
+        $this->withoutExceptionHandling();
         $response = $this->get('api/definitions?q=test');
 
         $response->assertStatus(200);

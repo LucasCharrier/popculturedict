@@ -5,15 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+use App;
+use App\Models\Definition;
+use App\Models\Tag;
 use App\Models\Word;
+use App\Http\Resources\Definition as DefinitionResource;
+use App\Http\Resources\DefinitionCollection;
 use App\Http\Resources\Word as WordResource;
 use App\Http\Resources\WordCollection;
 
-use App\Models\Tag;
+# TODO : move to utils files
+function utilsEndsWith($haystack, $needle) {
+    return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+}
 
-use App\Models\Definition;
-use App\Http\Resources\Definition as DefinitionResource;
-use App\Http\Resources\DefinitionCollection;
 
 class DefinitionController extends Controller
 {
@@ -21,33 +26,38 @@ class DefinitionController extends Controller
     {
         $search =  $request->input('q');
         $character = $request->input('character');
-        if ($search != "") {
+
+        # TODO : sqlite that run in test does not support ILIKE,
+        # we should use same db type as in prod or mock requests
+        $COMPARISON_OPERATOR = App::runningUnitTests() ? 'LIKE' : 'ILIKE';
+
+        if ($search) {
+            #
+            # TODO : Add a searchable field to implements fuzy search
+            #
             $pieces = explode("-", $search);
             $pieces = implode(" ", $pieces);
             $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
                 ->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC'])
-                ->where(function ($query) use ($search, $pieces){
-                    $query->where('text', 'ILIKE', '%'.$search.'%')
-                    ->orWhere('name', 'ILIKE', '%'.$search.'%')
-                    ->orWhere('name', 'ILIKE', '%'.$pieces.'%')
-                    ->orWhere('text', 'ILIKE', '%'.$pieces.'%');
-                    // $query->where('words.name', 'like', '%'.$search.'%')
-                    // ->orWhere('words.name', 'like', '%'.$search.'%');
+                ->where(function ($query) use ($search, $pieces, $COMPARISON_OPERATOR){
+                    $query->where('text', $COMPARISON_OPERATOR, '%'.$search.'%')
+                    ->orWhere('name', $COMPARISON_OPERATOR, '%'.$search.'%')
+                    ->orWhere('name', $COMPARISON_OPERATOR, '%'.$pieces.'%')
+                    ->orWhere('text', $COMPARISON_OPERATOR, '%'.$pieces.'%');
             })
             ->orderBy('created_at', 'desc')
             ->paginate();
             $definition->appends(['q' => $search]);
             return new DefinitionCollection($definition);
-        } else if ($character != "") {
+
+        } else if ($character) {
             $definition = Definition::join('words', 'definitions.word_id', '=', 'words.id')
                 ->select('words.name as wname', 'definitions.*')
                 ->where('definitions.visibility', '=', config('enums.visibility')['PUBLIC'])
-                ->where(function ($query) use ($character){
-                    // $query->where('text', 'ILIKE', $character.'%')
-                    // ->orWhere('name', 'ILIKE', $character.'%');
-                    $query->where('words.name', 'like', $character.'%')
-                    ->orWhere('words.name', 'like', $character.'%');
+                ->where(function ($query) use ($character, $COMPARISON_OPERATOR){
+                    $query->where('words.name', $COMPARISON_OPERATOR, $character.'%')
+                    ->orWhere('words.name', $COMPARISON_OPERATOR, $character.'%');
             })
             ->orderBy('created_at', 'desc')
             ->paginate(100);
@@ -55,7 +65,8 @@ class DefinitionController extends Controller
             return new DefinitionCollection($definition);
         }
         else{
-            return new DefinitionCollection(Definition::orderBy('created_at', 'desc')->where('visibility', config('enums.visibility')['PUBLIC'])
+            return new DefinitionCollection(Definition::orderBy('created_at', 'desc')
+                ->where('visibility', config('enums.visibility')['PUBLIC'])
                 ->paginate());
         }
     }
@@ -73,26 +84,22 @@ class DefinitionController extends Controller
             'text' => 'required',
             'exemple' => 'required'
         ]);
-
-        function endsWith($haystack, $needle) {
-            return substr_compare($haystack, $needle, -strlen($needle)) === 0;
-        }
         
         $media_url = $request->get('media_url');
 
-        if ($media_url && endsWith('giphy.com', parse_url($request->media_url)['host'])) {
+        if ($media_url && utilsEndsWith('giphy.com', parse_url($request->media_url)['host'])) {
             return response()->json(null, 401);
         }
         $word = Word::where('name', $request->get('name'))->first();
-        // $output->writeln('content of word' . $word);
         if (!$word) {
-            // $output->writeln('no word');
-
             $word = Word::create([
                 'name' => $request->get('name'),
             ]);
         }
-
+        #
+        # TODO : here we should use a transaction we want
+        # this queries to run all together or roll back
+        #
         $definition = Definition::create([
             'text' => $request->get('text'),
             'exemple' => $request->get('exemple'),
@@ -101,20 +108,31 @@ class DefinitionController extends Controller
             'media_url' => $media_url,
             'visibility' => config('enums.visibility')[$request->get('visibility', 'PUBLIC')]
         ]);
-        // $func = function($value) {
-        //     return ['text', 'LIKE', '%'.strtolower($value).'%'];
-        // };
-        $tags = array_unique($request->get('tags'));
-        if ($tags) {
+
+        if ($request->get('tags')) {
+            $tags = array_unique($request->get('tags'));
+            #
+            # TODO : the following implementation is lighter in term of code
+            # but seems to execute more queries to db, to check
+            #
+            // $tagIds = [];
+            // foreach ($tags as $tag) {
+            //     $tag = trim($tag);
+            //     if ($tag == '') {
+            //         continue;
+            //     }
+            //     $fTag = Tag::firstOrCreate([ 'text' =>  strtolower($tag)]);
+
+            //     $tagIds[] = $fTag->id; 
+            // }
+
             $tagsObj = Tag::query();
             foreach($tags as $tag){
                 $tagsObj->orWhere('text', '=', trim(strtolower($tag)));
             }
-            $tagsObj1 = $tagsObj->distinct()->get();
+            $tagsObj = $tagsObj->distinct()->get()->toArray();
 
-            $tagsObj = $tagsObj1->toArray();
-
-            //$output->writeln('content of word' . implode("|",$tagsObj));
+            // identify tags that alreay exist
             $tagIds = array_map(function ($a) { return $a['id']; }, $tagsObj);
             $tagNames = array_map(function ($a) { return strtolower($a['text']); }, $tagsObj);
             $tagsToCreate = array_filter($tags, function ($a) use ($tagNames) { 
@@ -132,11 +150,11 @@ class DefinitionController extends Controller
 
             $definition->tags()->sync($tagIds, false);
             $definition->tags()->createMany(array_map(function ($a) { return ['text' => $a]; }, $tagsToCreate));
-
         }
+
         return (new DefinitionResource($definition))->response()->setStatusCode(201);
     }
-
+    
     public function delete($id, Request $request)
     {
         $definition = Definition::findOrFail($id);
