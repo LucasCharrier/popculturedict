@@ -137,6 +137,7 @@ class DefinitionTest extends TestCase
      */
     public function authenticated_users_can_create_a_definition_with_not_tags_and_a_word_that_already_exists()
     {
+        $this->withoutExceptionHandling();
         $this->actingAsLoggedUser();
         $count = Definition::all()->count();
         Word::factory()->create(['name' => $this->data()['name']]);

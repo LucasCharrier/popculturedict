@@ -14,6 +14,8 @@ class TagDefinitionController extends Controller
     public function index(Event $tag)
     {
         $definitions = $tag->definitions;
-        return response()->json(['message'=>null,'data'=>$definitions],200);
+        return response()->json([
+            'message' => null,
+            'data' => $definitions], 200);
     }
 }
