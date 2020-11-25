@@ -9,6 +9,7 @@ use App;
 use App\Models\Definition;
 use App\Models\Tag;
 use App\Models\Word;
+use App\Jobs\ProcessDefinitionImage;
 use App\Http\Resources\Definition as DefinitionResource;
 use App\Http\Resources\DefinitionCollection;
 use App\Http\Resources\Word as WordResource;
@@ -151,6 +152,7 @@ class DefinitionController extends Controller
             $definition->tags()->sync($tagIds, false);
             $definition->tags()->createMany(array_map(function ($a) { return ['text' => $a]; }, $tagsToCreate));
         }
+        // ProcessDefinitionImage::dispatch($definition);
 
         return (new DefinitionResource($definition))->response()->setStatusCode(201);
     }
