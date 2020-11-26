@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\User;
 use App\Models\Definition;
 use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
-
 use App\Http\Resources\Definition as DefinitionResource;
 use App\Http\Resources\DefinitionCollection;
 
@@ -24,22 +24,24 @@ class UserController extends Controller
         #
         # TODO : investigate transactions
         #
-        $definition = Definition::findOrFail($id);
-        $value = $definition->reactions
-            ->where('pivot.user_id', $request->user()->id)
-            ->pluck('pivot.reaction_type')->unique()->first();
-        if ($value == config('enums.reaction_type')['LIKE']) {
-            return response()->json(null, 200);
-        } else if ($value == config('enums.reaction_type')['DISLIKE']) {
-            $definition->dislike = $definition->dislike - 1;
-        }
-        $definition->like = $definition->like + 1;
-        $definition->save();
-        $request->user()->reactions()->sync([
-            $id => [
-                'reaction_type' => config('enums.reaction_type')['LIKE']
-            ]
-        ], false);
+        DB::transaction(function () use ($id, $request) {
+            $definition = Definition::findOrFail($id);
+            $value = $definition->reactions
+                ->where('pivot.user_id', $request->user()->id)
+                ->pluck('pivot.reaction_type')->unique()->first();
+            if ($value == config('enums.reaction_type')['LIKE']) {
+                return response()->json(null, 200);
+            } else if ($value == config('enums.reaction_type')['DISLIKE']) {
+                $definition->dislike = $definition->dislike - 1;
+            }
+            $definition->like = $definition->like + 1;
+            $definition->save();
+            $request->user()->reactions()->sync([
+                $id => [
+                    'reaction_type' => config('enums.reaction_type')['LIKE']
+                ]
+            ], false);
+        });
     }
 
     public function dislike($id, Request $request)

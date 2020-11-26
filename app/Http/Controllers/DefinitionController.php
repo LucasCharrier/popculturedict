@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 use App;
@@ -97,61 +98,61 @@ class DefinitionController extends Controller
                 'name' => $request->get('name'),
             ]);
         }
-        #
-        # TODO : here we should use a transaction we want
-        # this queries to run all together or roll back
-        #
-        $definition = Definition::create([
-            'text' => $request->get('text'),
-            'exemple' => $request->get('exemple'),
-            'word_id' => $word->id,
-            'user_id' => $request->user()->id,
-            'media_url' => $media_url,
-            'visibility' => config('enums.visibility')[$request->get('visibility', 'PUBLIC')]
-        ]);
 
-        if ($request->get('tags')) {
-            $tags = array_unique($request->get('tags'));
-            #
-            # TODO : the following implementation is lighter in term of code
-            # but seems to execute more queries to db, to check
-            #
-            // $tagIds = [];
-            // foreach ($tags as $tag) {
-            //     $tag = trim($tag);
-            //     if ($tag == '') {
-            //         continue;
-            //     }
-            //     $fTag = Tag::firstOrCreate([ 'text' =>  strtolower($tag)]);
+        $definition = DB::transaction(function () use ($request, $word, $media_url) {
+            $definition = Definition::create([
+                'text' => $request->get('text'),
+                'exemple' => $request->get('exemple'),
+                'word_id' => $word->id,
+                'user_id' => $request->user()->id,
+                'media_url' => $media_url,
+                'visibility' => config('enums.visibility')[$request->get('visibility', 'PUBLIC')]
+            ]);
 
-            //     $tagIds[] = $fTag->id; 
-            // }
+            if ($request->get('tags')) {
+                $tags = array_unique($request->get('tags'));
+                #
+                # TODO : the following implementation is lighter in term of code
+                # but seems to execute more queries to db, to check
+                #
+                // $tagIds = [];
+                // foreach ($tags as $tag) {
+                //     $tag = trim($tag);
+                //     if ($tag == '') {
+                //         continue;
+                //     }
+                //     $fTag = Tag::firstOrCreate([ 'text' =>  strtolower($tag)]);
 
-            $tagsObj = Tag::query();
-            foreach($tags as $tag){
-                $tagsObj->orWhere('text', '=', trim(strtolower($tag)));
-            }
-            $tagsObj = $tagsObj->distinct()->get()->toArray();
+                //     $tagIds[] = $fTag->id; 
+                // }
 
-            // identify tags that alreay exist
-            $tagIds = array_map(function ($a) { return $a['id']; }, $tagsObj);
-            $tagNames = array_map(function ($a) { return strtolower($a['text']); }, $tagsObj);
-            $tagsToCreate = array_filter($tags, function ($a) use ($tagNames) { 
-                $found = false;
-                foreach ($tagNames as $value) {
-                    if (strtolower($value) === strtolower($a)) {
-                        $found = true;
+                $tagsObj = Tag::query();
+                foreach($tags as $tag){
+                    $tagsObj->orWhere('text', '=', trim(strtolower($tag)));
+                }
+                $tagsObj = $tagsObj->distinct()->get()->toArray();
+
+                // identify tags that alreay exist
+                $tagIds = array_map(function ($a) { return $a['id']; }, $tagsObj);
+                $tagNames = array_map(function ($a) { return strtolower($a['text']); }, $tagsObj);
+                $tagsToCreate = array_filter($tags, function ($a) use ($tagNames) { 
+                    $found = false;
+                    foreach ($tagNames as $value) {
+                        if (strtolower($value) === strtolower($a)) {
+                            $found = true;
+                        }
                     }
-                }
-                if ($found) {
-                    return false;
-                }
-                return true;
-            });
+                    if ($found) {
+                        return false;
+                    }
+                    return true;
+                });
 
-            $definition->tags()->sync($tagIds, false);
-            $definition->tags()->createMany(array_map(function ($a) { return ['text' => $a]; }, $tagsToCreate));
-        }
+                $definition->tags()->sync($tagIds, false);
+                $definition->tags()->createMany(array_map(function ($a) { return ['text' => $a]; }, $tagsToCreate));
+            }
+            return $definition;
+        });
         ProcessDefinitionImage::dispatch($definition);
 
         return (new DefinitionResource($definition))->response()->setStatusCode(201);
