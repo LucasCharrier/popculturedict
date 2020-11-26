@@ -1,6 +1,6 @@
 ## About API-Dictonnaire
 
-This is a side project, the aim was to keep in touch with my php knowledge
+This is a side project, the aim was to keep in touch with my php skills
 and to re-implement an old project.
 It is a reimplementation of an old student project in php that I did in 2011.
 It is usefull to take a look back at what I learn since this time.
@@ -12,7 +12,7 @@ It is to use with a front end part in Vuejs
 ## Test and Implementation
 
 I try to be as rigourous as possible. But you should keep in consideration:
-- as it is a side project I might be not as rigourous as I will be on a "real" project,
+- as it is a side project I might not be as rigourous as I will be on a "real" project,
 regarding test especially.
 Though I'll try to be on 80% coverage. 
 
