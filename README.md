@@ -18,11 +18,11 @@ Though I'll try to be on 80% coverage.
 
 ## TODOS
 - [x] added redis and image generate dummy process
-- [] review tests setup, mocking requests
-- [] finish image process 
-- [] implements fuzzy search using a token field or other methods in postgresql
-- [] design media link attached to a post 
-- [] add new endpoint : get one random word
-- [] add new endpoint : get word of the day | get the most liked word of the day pass in params
-- [] ...many other features
+- [ ] review tests setup, mocking requests
+- [ ] finish image process 
+- [ ] implements fuzzy search using a token field or other methods in postgresql
+- [ ] design media link attached to a post 
+- [ ] add new endpoint : get one random word
+- [ ] add new endpoint : get word of the day | get the most liked word of the day pass in params
+- [ ] ...many other features
 
