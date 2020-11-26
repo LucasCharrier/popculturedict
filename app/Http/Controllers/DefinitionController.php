@@ -152,7 +152,7 @@ class DefinitionController extends Controller
             $definition->tags()->sync($tagIds, false);
             $definition->tags()->createMany(array_map(function ($a) { return ['text' => $a]; }, $tagsToCreate));
         }
-        // ProcessDefinitionImage::dispatch($definition);
+        ProcessDefinitionImage::dispatch($definition);
 
         return (new DefinitionResource($definition))->response()->setStatusCode(201);
     }
