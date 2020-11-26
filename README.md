@@ -16,7 +16,7 @@ I try to be as rigourous as possible. But you should keep in consideration:
 regarding test especially.
 Though I'll try to be on 80% coverage. 
 
-## TODOS (ordered in the order I'd like to implements them at the time)
+## TODOS
 - [x] added redis and image generate dummy process
 - [] review tests setup, mocking requests
 - [] finish image process 
@@ -26,6 +26,3 @@ Though I'll try to be on 80% coverage.
 - [] add new endpoint : get word of the day | get the most liked word of the day pass in params
 - [] ...many other features
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
