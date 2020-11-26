@@ -38,7 +38,6 @@ class DefinitionTest extends TestCase
      */
     public function every_in_users_can_fetch_definition_list_with_query()
     {
-        // $this->withoutExceptionHandling();
         $user = User::factory()->create();
         $word = Word::factory()->create(['name' => 'something']);
         $definitionWithQueryWordInText = Definition::factory()->create([
@@ -155,6 +154,7 @@ class DefinitionTest extends TestCase
      */
     public function authenticated_users_can_create_a_definition_with_new_tags()
     {
+        $this->withoutExceptionHandling();
         $this->actingAsLoggedUser();
         $count = Definition::all()->count();
         $count = Tag::all()->count();

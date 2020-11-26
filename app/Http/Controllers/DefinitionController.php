@@ -16,11 +16,9 @@ use App\Http\Resources\DefinitionCollection;
 use App\Http\Resources\Word as WordResource;
 use App\Http\Resources\WordCollection;
 
-# TODO : move to utils files
-function utilsEndsWith($haystack, $needle) {
+function findIfEndsWith($haystack, $needle) {
     return substr_compare($haystack, $needle, -strlen($needle)) === 0;
 }
-
 
 class DefinitionController extends Controller
 {
@@ -89,8 +87,8 @@ class DefinitionController extends Controller
         
         $media_url = $request->get('media_url');
 
-        if ($media_url && utilsEndsWith('giphy.com', parse_url($request->media_url)['host'])) {
-            return response()->json(null, 401);
+        if ($media_url && findIfEndsWith('giphy.com', parse_url($request->media_url)['host'])) {
+            return response()->json(null, 400);
         }
         $word = Word::where('name', $request->get('name'))->first();
         if (!$word) {
@@ -110,45 +108,34 @@ class DefinitionController extends Controller
             ]);
 
             if ($request->get('tags')) {
-                $tags = array_unique($request->get('tags'));
-                #
-                # TODO : the following implementation is lighter in term of code
-                # but seems to execute more queries to db, to check
-                #
-                // $tagIds = [];
-                // foreach ($tags as $tag) {
-                //     $tag = trim($tag);
-                //     if ($tag == '') {
-                //         continue;
-                //     }
-                //     $fTag = Tag::firstOrCreate([ 'text' =>  strtolower($tag)]);
+                // clean sent tags : unique, not empty
+                $tags = array_filter(array_unique($request->get('tags')), function ($tag) {
+                    return trim($tag);
+                });
 
-                //     $tagIds[] = $fTag->id; 
-                // }
-
-                $tagsObj = Tag::query();
+                $tagsQuery = Tag::query();
                 foreach($tags as $tag){
-                    $tagsObj->orWhere('text', '=', trim(strtolower($tag)));
+                    $tagsQuery->orWhere('text', '=', trim(strtolower($tag)));
                 }
-                $tagsObj = $tagsObj->distinct()->get()->toArray();
+                $tagsFromDB = $tagsQuery ->distinct()->get()->toArray();
 
-                // identify tags that alreay exist
-                $tagIds = array_map(function ($a) { return $a['id']; }, $tagsObj);
-                $tagNames = array_map(function ($a) { return strtolower($a['text']); }, $tagsObj);
-                $tagsToCreate = array_filter($tags, function ($a) use ($tagNames) { 
+                // get ids for tags that alreay exist
+                $tagFromDBIds = array_map(function ($a) { return $a['id']; }, $tagsFromDB);
+
+                // get tag's text for tags that already exist
+                $tagFromDBTexts = array_map(function ($a) { return strtolower($a['text']); }, $tagsFromDB);
+
+                $tagsToCreate = array_filter($tags, function ($a) use ($tagFromDBTexts) { 
                     $found = false;
-                    foreach ($tagNames as $value) {
-                        if (strtolower($value) === strtolower($a)) {
+                    foreach ($tagFromDBTexts as $tagText) {
+                        if (strtolower($tagText) === strtolower($a)) {
                             $found = true;
                         }
                     }
-                    if ($found) {
-                        return false;
-                    }
-                    return true;
+                   return !$found;
                 });
 
-                $definition->tags()->sync($tagIds, false);
+                $definition->tags()->sync($tagFromDBIds, false);
                 $definition->tags()->createMany(array_map(function ($a) { return ['text' => $a]; }, $tagsToCreate));
             }
             return $definition;
